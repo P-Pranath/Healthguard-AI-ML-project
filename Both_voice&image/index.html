@@ -1,0 +1,358 @@
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .upload-section {
+            margin-bottom: 20px;
+        }
+        .upload-section h2 {
+            margin-bottom: 10px;
+        }
+        .upload-section input {
+            margin-bottom: 10px;
+        }
+        .upload-section button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .upload-section button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Voice and Image Files</h1>
+
+    <!-- Voice File Upload --><!--
+    <div class="upload-section">
+        <h2>Upload Voice File</h2>
+        <input type="file" id="voiceFile">
+        <button onclick="uploadVoice()">Upload Voice</button>
+        <div id="voiceResponse" class="response"></div>
+    </div>
+
+    <!-- Image File Upload --><!--
+    <div class="upload-section">
+        <h2>Upload Image File</h2>
+        <input type="file" id="imageFile">
+        <button onclick="uploadImage()">Upload Image</button>
+        <div id="imageResponse" class="response"></div>
+    </div>
+
+    <!-- Parse Files Button --><!--
+    <div class="upload-section">
+        <h2>Parse Uploaded Files</h2>
+        <button onclick="parseFiles()">Parse Files</button>
+        <div id="parseResponse" class="response"></div>
+    </div>
+
+    <!-- Display Results --><!--
+    <div class="upload-section">
+        <h2>Processed Results</h2>
+        <div id="results" class="response"></div>
+    </div>
+
+    <script>
+        async function uploadVoice() {
+            const fileInput = document.getElementById('voiceFile');
+            const responseDiv = document.getElementById('voiceResponse');
+
+            if (!fileInput.files.length) {
+                responseDiv.textContent = "Please select a voice file.";
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/upload/voice/', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    responseDiv.textContent = `Upload successful! File ID: ${result.id}, Path: ${result.file_path}`;
+                } else {
+                    const error = await response.json();
+                    responseDiv.textContent = `Upload failed: ${error.detail}`;
+                }
+            } catch (error) {
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function uploadImage() {
+            const fileInput = document.getElementById('imageFile');
+            const responseDiv = document.getElementById('imageResponse');
+
+            if (!fileInput.files.length) {
+                responseDiv.textContent = "Please select an image file.";
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/upload/image/', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    responseDiv.textContent = `Upload successful! File ID: ${result.id}, Path: ${result.file_path}`;
+                } else {
+                    const error = await response.json();
+                    responseDiv.textContent = `Upload failed: ${error.detail}`;
+                }
+            } catch (error) {
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function parseFiles() {
+            const responseDiv = document.getElementById('parseResponse');
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/parse/', {
+                    method: 'POST',
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    responseDiv.textContent = `Parsing completed: ${result.message}`;
+                    fetchResults(); // Fetch and display results after parsing
+                } else {
+                    const error = await response.json();
+                    responseDiv.textContent = `Parsing failed: ${error.detail}`;
+                }
+            } catch (error) {
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function fetchResults() {
+            const resultsDiv = document.getElementById('results');
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/files/');
+                if (response.ok) {
+                    const files = await response.json();
+                    resultsDiv.innerHTML = "<h3>Processed Results:</h3>";
+                    files.forEach(file => {
+                        resultsDiv.innerHTML += `
+                            <p><strong>File ID:</strong> ${file.id}</p>
+                            <p><strong>Type:</strong> ${file.file_type}</p>
+                            <p><strong>Result:</strong> ${file.processed_result}</p>
+                            <hr>
+                        `;
+                    });
+                } else {
+                    resultsDiv.textContent = "Failed to fetch results.";
+                }
+            } catch (error) {
+                resultsDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Keep the same CSS styles from previous version -->
+    <style>
+        /* Maintain all previous CSS styles */
+    </style>
+</head>
+<body>
+    <h1>File Processing System</h1>
+
+    <!-- Voice Upload -->
+    <div class="upload-section">
+        <h2>Upload Voice File</h2>
+        <div class="file-input-wrapper">
+            <input type="file" id="voiceFile" accept="audio/*">
+            <button class="upload-btn" onclick="uploadFile('voice')">Upload Voice</button>
+        </div>
+        <div id="voiceResponse" class="response"></div>
+    </div>
+
+    <!-- Image Upload -->
+    <div class="upload-section">
+        <h2>Upload Image File</h2>
+        <div class="file-input-wrapper">
+            <input type="file" id="imageFile" accept="image/*">
+            <button class="upload-btn" onclick="uploadFile('image')">Upload Image</button>
+        </div>
+        <div id="imageResponse" class="response"></div>
+    </div>
+
+    <!-- Process Files -->
+    <div class="upload-section">
+        <h2>Process Files</h2>
+        <button class="parse-btn" onclick="processFiles()" disabled>Process Files</button>
+        <div id="processResponse" class="response"></div>
+    </div>
+
+    <!-- Results Display -->
+    <div class="upload-section">
+        <h2>Processing Results</h2>
+        <div id="results" class="response"></div>
+    </div>
+
+    <script>
+        let currentFiles = {
+            voice: null,
+            image: null
+        };
+
+        function updateProcessButton() {
+            const processBtn = document.querySelector('.parse-btn');
+            processBtn.disabled = !(currentFiles.voice || currentFiles.image);
+        }
+
+        async function uploadFile(type) {
+            const inputId = `${type}File`;
+            const fileInput = document.getElementById(inputId);
+            const responseDiv = document.getElementById(`${type}Response`);
+            
+            if (!fileInput.files.length) {
+                showMessage(responseDiv, `Please select a ${type} file`, 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/upload/${type}/`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    currentFiles[type] = result.id;
+                    showMessage(responseDiv, `Uploaded ${type} file (ID: ${result.id})`, 'success');
+                    updateProcessButton();
+                } else {
+                    const error = await response.json();
+                    showMessage(responseDiv, `Upload failed: ${error.detail}`, 'error');
+                }
+            } catch (error) {
+                showMessage(responseDiv, `Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function processFiles() {
+            const responseDiv = document.getElementById('processResponse');
+            const processBtn = document.querySelector('.parse-btn');
+            
+            try {
+                processBtn.disabled = true;
+                processBtn.innerHTML = '<div class="loading"></div> Processing...';
+                
+                const response = await fetch('http://127.0.0.1:8000/parse/', {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(responseDiv, 'Processing completed', 'success');
+                    await fetchResults();
+                } else {
+                    showMessage(responseDiv, `Processing failed: ${result.detail}`, 'error');
+                }
+            } catch (error) {
+                showMessage(responseDiv, `Network error: ${error.message}`, 'error');
+            } finally {
+                processBtn.disabled = false;
+                processBtn.innerHTML = 'Process Files';
+            }
+        }
+
+        // MODIFIED RESULTS DISPLAY
+async function fetchResults() {
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '<div class="loading"></div>';
+
+    try {
+        const response = await fetch('http://127.0.0.1:8000/results/');
+        if (!response.ok) throw new Error('Failed to fetch results');
+        
+        const results = await response.json();
+        resultsDiv.innerHTML = '';
+
+        results.forEach(result => {
+            const card = document.createElement('div');
+            card.className = 'result-card';
+            
+            try {
+                const data = JSON.parse(result.result);
+                
+                if (data.transcription) {
+                    card.innerHTML = `
+                        <h3>Voice Transcription</h3>
+                        <div class="transcript">${data.transcription}</div>
+                    `;
+                } 
+                else if (Array.isArray(data)) {
+                    card.innerHTML = `
+                        <h3>Image Analysis</h3>
+                        <ul class="image-results">
+                            ${data.map(item => `
+                                <li>
+                                    <span class="label">${item.label}</span>
+                                    <span class="score">${(item.score * 100).toFixed(1)}%</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                }
+                
+                resultsDiv.appendChild(card);
+            } catch (e) {
+                card.innerHTML = `<p class="error">Error displaying results: ${e.message}</p>`;
+                resultsDiv.appendChild(card);
+            }
+        });
+
+    } catch (error) {
+        resultsDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+    }
+}
+
+        function showMessage(element, message, type = 'success') {
+            element.className = `response ${type}`;
+            element.textContent = message;
+        }
+    </script>
+</body>
+</html>
+

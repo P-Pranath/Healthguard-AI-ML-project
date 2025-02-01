@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+            max-width: 800px;
+        }
+        .upload-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .file-input-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin: 1rem 0;
+        }
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #28a745;
+            color: white;
+            transition: opacity 0.3s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .loading {
+            display: inline-block;
+            width: 1.2rem;
+            height: 1.2rem;
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3498db;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .results {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Processing System</h1>
+
+    <div class="upload-section">
+        <h2>Upload Image</h2>
+        <div class="file-input-wrapper">
+            <input type="file" id="imageFile" accept="image/*">
+            <button onclick="uploadImage()">Upload Image</button>
+        </div>
+        <div id="uploadResponse"></div>
+    </div>
+
+    <div class="upload-section">
+        <h2>Process Image</h2>
+        <button onclick="processImage()">Process Image</button>
+        <div id="processResponse"></div>
+    </div>
+
+    <div class="results" id="results"></div>
+
+    <script>
+        async function uploadImage() {
+            const fileInput = document.getElementById('imageFile');
+            const responseDiv = document.getElementById('uploadResponse');
+            const btn = fileInput.nextElementSibling;
+            
+            if (!fileInput.files.length) {
+                showMessage(responseDiv, "Please select an image file", "error");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<div class="loading"></div> Uploading...';
+                
+                const response = await fetch('http://localhost:8000/upload/image/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(responseDiv, `Image uploaded successfully (ID: ${result.id})`, "success");
+                } else {
+                    showMessage(responseDiv, `Upload failed: ${result.detail}`, "error");
+                }
+            } catch (error) {
+                showMessage(responseDiv, `Network error: ${error.message}`, "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Upload Image';
+            }
+        }
+
+        async function processImage() {
+            const responseDiv = document.getElementById('processResponse');
+            const btn = document.querySelector('#processResponse').previousElementSibling;
+            
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<div class="loading"></div> Processing...';
+                
+                const response = await fetch('http://localhost:8000/process/image/', {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(responseDiv, "Processing completed", "success");
+                    displayResults(result.results);
+                } else {
+                    showMessage(responseDiv, `Processing failed: ${result.detail}`, "error");
+                }
+            } catch (error) {
+                showMessage(responseDiv, `Network error: ${error.message}`, "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Process Image';
+            }
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('results');
+            container.innerHTML = '<h3>Analysis Results:</h3>';
+            
+            results.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.innerHTML = `
+                    <span>${item.label}</span>
+                    <span>${(item.score * 100).toFixed(1)}%</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function showMessage(element, message, type = 'success') {
+            element.className = `message ${type}`;
+            element.textContent = message;
+        }
+    </script>
+</body>
+</html>
